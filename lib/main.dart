@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home.dart';
+import 'app.dart';
 
 void main() => runApp(Myapp());
 
@@ -13,7 +13,7 @@ class Myapp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity),
       debugShowCheckedModeBanner: false,
       title: 'Carrot Market Clone',
-      home: Carrot(),
+      home: App(),
     );
   }
 }
