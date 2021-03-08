@@ -1,5 +1,8 @@
+import 'package:CarrotMarketClone/repository/contents_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'detailPage.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -7,7 +10,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Map<String, String>> datas = [];
+  ContentsRepository contentsRepository;
+
   String currentLocation;
   final Map<String, String> locationCurrent = {
     "sinsa": "신사동",
@@ -18,88 +22,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     currentLocation = "sinsa";
-    datas = [
-      {
-        "cid": "1",
-        "image": "assets/images/ara-1.jpg",
-        "title": "네메시스 축구화275",
-        "location": "제주 제주시 신사동",
-        "price": "30000",
-        "likes": "2"
-      },
-      {
-        "cid": "2",
-        "image": "assets/images/ara-2.jpg",
-        "title": "LA갈비 5kg팔아요~",
-        "location": "제주 제주시 신사동",
-        "price": "100000",
-        "likes": "5"
-      },
-      {
-        "cid": "3",
-        "image": "assets/images/ara-3.jpg",
-        "title": "치약팝니다",
-        "location": "제주 제주시 신사동",
-        "price": "5000",
-        "likes": "0"
-      },
-      {
-        "cid": "4",
-        "image": "assets/images/ara-4.jpg",
-        "title": "[풀박스]맥북프로16인치 터치바 스페이스그레이",
-        "location": "제주 제주시 논현동",
-        "price": "2500000",
-        "likes": "6"
-      },
-      {
-        "cid": "5",
-        "image": "assets/images/ara-5.jpg",
-        "title": "디월트존기임팩",
-        "location": "제주 제주시 논현동",
-        "price": "150000",
-        "likes": "2"
-      },
-      {
-        "cid": "6",
-        "image": "assets/images/ara-6.jpg",
-        "title": "갤럭시s10",
-        "location": "제주 제주시 논현동",
-        "price": "180000",
-        "likes": "2"
-      },
-      {
-        "cid": "7",
-        "image": "assets/images/ara-7.jpg",
-        "title": "선반",
-        "location": "제주 제주시 역삼동",
-        "price": "15000",
-        "likes": "2"
-      },
-      {
-        "cid": "8",
-        "image": "assets/images/ara-8.jpg",
-        "title": "냉장 쇼케이스",
-        "location": "제주 제주시 역삼동",
-        "price": "80000",
-        "likes": "3"
-      },
-      {
-        "cid": "9",
-        "image": "assets/images/ara-9.jpg",
-        "title": "대우 미니냉장고",
-        "location": "제주 제주시 역삼동",
-        "price": "30000",
-        "likes": "3"
-      },
-      {
-        "cid": "10",
-        "image": "assets/images/ara-10.jpg",
-        "title": "멜킨스 풀업 턱걸이 판매합니다.",
-        "location": "제주 제주시 아라동",
-        "price": "50000",
-        "likes": "7"
-      },
-    ];
+    contentsRepository = ContentsRepository();
   }
 
   Widget _appbarwd() {
@@ -139,7 +62,6 @@ class _HomeState extends State<Home> {
           },
           child: Row(
             children: [
-              
               Text(locationCurrent[currentLocation]),
               Icon(Icons.arrow_drop_down)
             ],
@@ -172,71 +94,87 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _bodyWidget() {
+  _loadContents() {
+    return contentsRepository.loadContentsFromLocation(currentLocation);
+  }
+
+  _makeDataList(List<Map<String, String>> datas) {
     return ListView.separated(
         padding: EdgeInsets.symmetric(horizontal: 10),
         itemBuilder: (context, index) {
-          return Container(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              children: [
-                ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    child: Image.asset(
-                      datas[index]["image"],
+          return GestureDetector(
+            onTap: () {
+              print(datas[index]);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Detail(received: datas[index])));
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: [
+                  ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      child: Hero(
+                        tag: datas[index]["cid"],
+                        child: Image.asset(
+                          datas[index]["image"],
+                          height: 100,
+                          width: 100,
+                        ),
+                      )),
+                  Expanded(
+                    child: Container(
                       height: 100,
-                      width: 100,
-                    )),
-                Expanded(
-                  child: Container(
-                    height: 100,
-                    padding: const EdgeInsets.only(left: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          datas[index]["title"],
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          datas[index]["location"],
-                          style:
-                              TextStyle(color: Colors.black.withOpacity(0.4)),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          datas[index]["price"] + "원",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
-                        ),
-                        Expanded(
-                          child: Container(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                SvgPicture.asset(
-                                  "assets/svg/heart_off.svg",
-                                  height: 25,
-                                  width: 15,
-                                ),
-                                Text(datas[index]["likes"])
-                              ],
-                            ),
+                      padding: const EdgeInsets.only(left: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            datas[index]["title"],
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 17, fontWeight: FontWeight.w700),
                           ),
-                        )
-                      ],
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            datas[index]["location"],
+                            style:
+                                TextStyle(color: Colors.black.withOpacity(0.4)),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            stringDetector(datas[index]["price"]),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                          Expanded(
+                            child: Container(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  SvgPicture.asset(
+                                    "assets/svg/heart_off.svg",
+                                    height: 25,
+                                    width: 15,
+                                  ),
+                                  Text(datas[index]["likes"])
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -247,7 +185,39 @@ class _HomeState extends State<Home> {
             thickness: 0,
           );
         }),
-        itemCount: 10);
+        itemCount: datas.length);
+  }
+
+  stringDetector(String priceString) {
+    if (priceString == "무료나눔") {
+      return priceString;
+    } else
+      return priceString + "원";
+  }
+
+  Widget _bodyWidget() {
+    return FutureBuilder(
+      future: _loadContents(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('데이터 오류'),
+          );
+        }
+
+        if (snapshot.hasData) {
+          return _makeDataList(snapshot.data);
+        }
+
+        return Center(
+          child: Text("해당지역에 데이터 없음"),
+        );
+      },
+    );
   }
 
   @override
