@@ -1,6 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
+import 'components/manor_temperature.dart';
+
 class Detail extends StatefulWidget {
   Map<String, String> received;
   Detail({Key key, this.received}) : super(key: key);
@@ -56,7 +58,7 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Widget _bodyWidget() {
+  Widget _makeSliderImage() {
     return Container(
       child: Stack(
         children: [
@@ -95,8 +97,6 @@ class _DetailState extends State<Detail> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: imgList.map((map) {
-                print(_current);
-                print(map);
                 return Container(
                   width: 10.0,
                   height: 10.0,
@@ -113,6 +113,44 @@ class _DetailState extends State<Detail> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _sellerSimpleInfo() {
+    return Padding(
+      padding: EdgeInsets.all(15),
+          child: Row(
+        children: [
+          // ClipRRect(
+          //   borderRadius: BorderRadius.circular(50),
+          //   child: Container(child: Image.asset('assets/images/user.png'), width: 50, height: 50,),
+          // )
+          CircleAvatar(
+            radius: 25,
+            backgroundImage: Image.asset('assets/images/user.png').image,
+          ),
+          SizedBox(
+            width: 15,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '코딩매니아',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+              Text('남양주시 다산동')
+            ],
+          ),
+          Expanded(child: ManorTemperature(manorTemp: 37.5))
+        ],
+      ),
+    );
+  }
+
+  Widget _bodyWidget() {
+    return Column(
+      children: [_makeSliderImage(), _sellerSimpleInfo()],
     );
   }
 
