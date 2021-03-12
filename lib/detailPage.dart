@@ -11,10 +11,32 @@ class Detail extends StatefulWidget {
   _DetailState createState() => _DetailState();
 }
 
-class _DetailState extends State<Detail> {
+class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
   Size size;
   List<Map<String, String>> imgList;
   int _current;
+  double scollposition = 0;
+  ScrollController _controller = ScrollController();
+  AnimationController _animationController;
+  Animation _colorTween;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(vsync: this);
+    _colorTween = ColorTween(begin: Colors.white, end: Colors.black)
+        .animate(_animationController);
+    _controller.addListener(() {
+      setState(() {
+        if (_controller.offset > 255) {
+          scollposition = 255;
+        } else {
+          scollposition = _controller.offset;
+        }
+        _animationController.value = scollposition / 255;
+      });
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -30,12 +52,26 @@ class _DetailState extends State<Detail> {
     _current = 0;
   }
 
+  Widget _makeIcon(IconData icon){
+    return AnimatedBuilder(
+            animation: _colorTween,
+            builder: (context, child) => Icon(
+                  icon,
+                  color: _colorTween.value,
+                ));
+  }
+
   Widget _appbarWidget() {
     return AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white.withAlpha(scollposition.toInt()),
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: AnimatedBuilder(
+            animation: _colorTween,
+            builder: (context, child) => Icon(
+                  Icons.arrow_back,
+                  color: _colorTween.value,
+                )),
         onPressed: () {
           Navigator.pop(context);
         },
@@ -43,16 +79,11 @@ class _DetailState extends State<Detail> {
       ),
       actions: [
         IconButton(
-            icon: Icon(
-              Icons.share,
-              color: Colors.white,
-            ),
+            icon: _makeIcon(Icons.share),
             onPressed: () {}),
         IconButton(
-            icon: Icon(
-              Icons.more_vert,
-              color: Colors.white,
-            ),
+            icon: _makeIcon(Icons.more_vert),
+            
             onPressed: () {}),
       ],
     );
@@ -119,7 +150,7 @@ class _DetailState extends State<Detail> {
   Widget _sellerSimpleInfo() {
     return Padding(
       padding: EdgeInsets.all(15),
-          child: Row(
+      child: Row(
         children: [
           // ClipRRect(
           //   borderRadius: BorderRadius.circular(50),
@@ -148,10 +179,113 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Widget _bodyWidget() {
-    return Column(
-      children: [_makeSliderImage(), _sellerSimpleInfo()],
+  Widget _contentText() {
+    return Container(
+      // alignment: Alignment.bottomLeft,
+      // color: Colors.red,
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            widget.received["title"],
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+          ),
+          Text(
+            "디지털/가전 · 22시간전",
+            style: TextStyle(fontSize: 15, color: Colors.grey),
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Text(
+            '선물받은 새 상품이고 \n상품꺼재보기만 했습니다 \n거래는 직거래만 가능합니다',
+            style: TextStyle(fontSize: 18, color: Colors.black, height: 1.5),
+          ),
+          SizedBox(
+            height: 15,
+          ),
+          Text(
+            '채팅 3 · 관심17 · 조회295',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          SizedBox(
+            height: 15,
+          ),
+        ],
+      ),
     );
+  }
+
+  otherContents() {
+    return Padding(
+      padding: EdgeInsets.all(15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "판매자님의 판매상품",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          Text(
+            "모두보기",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget linecon() {
+    return Divider(
+      height: 20,
+      color: Colors.grey[400],
+      thickness: 0,
+      endIndent: 15,
+      indent: 15,
+    );
+  }
+
+  Widget _bodyWidget() {
+    return CustomScrollView(controller: _controller, slivers: [
+      SliverList(
+        delegate: SliverChildListDelegate([
+          _makeSliderImage(),
+          _sellerSimpleInfo(),
+          linecon(),
+          _contentText(),
+          linecon(),
+          otherContents()
+        ]),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        sliver: SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10),
+          delegate: SliverChildListDelegate(List.generate(
+              20,
+              (index) => Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            color: Colors.grey,
+                            height: 120,
+                          ),
+                        ),
+                        Text("상품제목", style: TextStyle(fontSize: 15)),
+                        Text("가격",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 15))
+                      ],
+                    ),
+                  ))),
+        ),
+      )
+    ]);
   }
 
   _bottomNavbar() {

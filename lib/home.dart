@@ -23,6 +23,7 @@ class _HomeState extends State<Home> {
     super.initState();
     currentLocation = "sinsa";
     contentsRepository = ContentsRepository();
+    print(contentsRepository.data);
   }
 
   Widget _appbarwd() {
