@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'components/manor_temperature.dart';
 
@@ -12,6 +13,7 @@ class Detail extends StatefulWidget {
 }
 
 class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   Size size;
   List<Map<String, String>> imgList;
   int _current;
@@ -19,10 +21,12 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
   ScrollController _controller = ScrollController();
   AnimationController _animationController;
   Animation _colorTween;
+  bool isMyFavoriteContent;
 
   @override
   void initState() {
     super.initState();
+    isMyFavoriteContent = false;
     _animationController = AnimationController(vsync: this);
     _colorTween = ColorTween(begin: Colors.white, end: Colors.black)
         .animate(_animationController);
@@ -52,13 +56,13 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
     _current = 0;
   }
 
-  Widget _makeIcon(IconData icon){
+  Widget _makeIcon(IconData icon) {
     return AnimatedBuilder(
-            animation: _colorTween,
-            builder: (context, child) => Icon(
-                  icon,
-                  color: _colorTween.value,
-                ));
+        animation: _colorTween,
+        builder: (context, child) => Icon(
+              icon,
+              color: _colorTween.value,
+            ));
   }
 
   Widget _appbarWidget() {
@@ -78,13 +82,8 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
         color: Colors.white,
       ),
       actions: [
-        IconButton(
-            icon: _makeIcon(Icons.share),
-            onPressed: () {}),
-        IconButton(
-            icon: _makeIcon(Icons.more_vert),
-            
-            onPressed: () {}),
+        IconButton(icon: _makeIcon(Icons.share), onPressed: () {}),
+        IconButton(icon: _makeIcon(Icons.more_vert), onPressed: () {}),
       ],
     );
   }
@@ -105,10 +104,8 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
                     setState(() {
                       _current = index;
                     });
-                    print(index);
                   }),
               items: imgList.map((map) {
-                print(map);
                 return Container(
                   width: size.width,
                   height: size.width,
@@ -288,17 +285,103 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
     ]);
   }
 
+  // void countSnackBar(BuildContext context, isMyFavoriteContent) {
+  //   Scaffold.of(context).showSnackBar(SnackBar(
+  //     content: Text(
+  //       isMyFavoriteContent ? '상품에 좋아요를 하였습니다' : '상품에 좋아요를 취소 하였습니다',
+  //       textAlign: TextAlign.center,
+  //     ),
+  //     duration: Duration(seconds: 1),
+  //     backgroundColor: Colors.green[500],
+  //   ));
+  // }
+
   _bottomNavbar() {
-    return Container(
-      width: size.width,
-      height: 55,
-      color: Colors.red,
+    return Builder(
+      builder: (context) {
+        return Container(
+          margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
+          width: size.width,
+          height: 55,
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isMyFavoriteContent = !isMyFavoriteContent;
+                    // countSnackBar(context, isMyFavoriteContent);
+                  });
+                  scaffoldKey.currentState.showSnackBar(SnackBar(
+                    duration: Duration(milliseconds: 1000),
+                    content: Text(isMyFavoriteContent
+                        ? "상품에 좋아요를 했습니다"
+                        : "상품에 좋아요를 취소 했습니다"),
+                  ));
+                },
+                child: SvgPicture.asset(
+                  isMyFavoriteContent
+                      ? "assets/svg/heart_on.svg"
+                      : "assets/svg/heart_off.svg",
+                  width: 25,
+                  height: 25,
+                  color: Color(0xfff08f4f),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 15, right: 10),
+                height: 40,
+                width: 1,
+                color: Colors.grey.withOpacity(0.3),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 3),
+                // color: Colors.red,
+                child: Column(
+                  children: [
+                    Text(
+                      widget.received["price"] + "원",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    Text('가격제안불가')
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+                      decoration: BoxDecoration(
+                          color: Color(0xfff08f4f),
+                          borderRadius: BorderRadius.circular(5)),
+                      child: Text(
+                        "채팅으로 거래하기",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       extendBodyBehindAppBar: true,
       appBar: _appbarWidget(),
       body: _bodyWidget(),
