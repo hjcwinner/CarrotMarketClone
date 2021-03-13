@@ -1,3 +1,4 @@
+import 'package:CarrotMarketClone/repository/contents_repository.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,6 +15,7 @@ class Detail extends StatefulWidget {
 
 class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  ContentsRepository contentsRepository;
   Size size;
   List<Map<String, String>> imgList;
   int _current;
@@ -21,12 +23,13 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
   ScrollController _controller = ScrollController();
   AnimationController _animationController;
   Animation _colorTween;
-  bool isMyFavoriteContent;
+  bool isMyFavoriteContent = false;
 
   @override
   void initState() {
     super.initState();
     isMyFavoriteContent = false;
+    contentsRepository = ContentsRepository();
     _animationController = AnimationController(vsync: this);
     _colorTween = ColorTween(begin: Colors.white, end: Colors.black)
         .animate(_animationController);
@@ -39,6 +42,14 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
         }
         _animationController.value = scollposition / 255;
       });
+    });
+    _loadMyFavoriteContentState();
+  }
+
+  _loadMyFavoriteContentState()async{
+    bool ck = await contentsRepository.isMyFavoritecontents(widget.received["cid"]);
+    setState(() {
+      isMyFavoriteContent = ck;
     });
   }
 
@@ -306,7 +317,14 @@ class _DetailState extends State<Detail> with SingleTickerProviderStateMixin {
           child: Row(
             children: [
               GestureDetector(
-                onTap: () {
+                onTap: () async{
+                  if (isMyFavoriteContent){
+                      await contentsRepository.deleteMyFavoriteContent(widget.received['cid']);
+                  }
+                  else
+                  {
+                    await contentsRepository.addMyFavoriteContent(widget.received);
+                  }
                   setState(() {
                     isMyFavoriteContent = !isMyFavoriteContent;
                     // countSnackBar(context, isMyFavoriteContent);

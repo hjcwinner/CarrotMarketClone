@@ -1,4 +1,9 @@
-class ContentsRepository {
+import 'dart:convert';
+
+import 'package:CarrotMarketClone/repository/local_storage_repository.dart';
+
+class ContentsRepository extends LocalStorageRepository {
+  final String MY_FAVOIRTE_STORE_KEY = "MY_FAVOIRTE_STORE_KEY";
   Map<String, dynamic> data = {
     "sinsa": [
       {
@@ -108,8 +113,6 @@ class ContentsRepository {
         "likes": "8"
       }
     ],
-    // "yuksa": [
-    // ]
   };
 
   Future<List<Map<String, String>>> loadContentsFromLocation(
@@ -118,5 +121,53 @@ class ContentsRepository {
     await Future.delayed(Duration(microseconds: 1000));
     // throw Exception();
     return data[location];
+  }
+
+  Future<List> loadFavoriteContents() async {
+    String jsonString = await this.getStoredValue(MY_FAVOIRTE_STORE_KEY);
+    if (jsonString != null) {
+      List<dynamic> json = jsonDecode(jsonString);
+      return json;
+    } else {
+      return null;
+    }
+  }
+
+  addMyFavoriteContent(Map<String, String> content) async {
+    List<dynamic> favoriteContentList = await loadFavoriteContents();
+    if (favoriteContentList == null || !(favoriteContentList is List)) {
+      favoriteContentList = [content];
+    } else {
+      favoriteContentList.add(content);
+    }
+    updataFavoriteContent(favoriteContentList);
+  }
+
+  isMyFavoritecontents(String cid) async {
+    bool isMyFavoriteContents = false;
+    List json = await loadFavoriteContents();
+    if (json == null || !(json is List)) {
+      return false;
+    } else {
+      for (dynamic data in json) {
+        if (data["cid"] == cid) {
+          isMyFavoriteContents = true;
+          break;
+        }
+      }
+    }
+    return isMyFavoriteContents;
+  }
+
+  void updataFavoriteContent(List favoriteContentList) async{
+    await this.storeValue(MY_FAVOIRTE_STORE_KEY, jsonEncode(favoriteContentList));
+  }
+
+  deleteMyFavoriteContent(String cid) async{
+    List<dynamic> favoriteContentList = await loadFavoriteContents();
+    if(favoriteContentList != null || favoriteContentList is List){
+        favoriteContentList.removeWhere((data) => data["cid"] == cid);
+    }
+    updataFavoriteContent(favoriteContentList);
   }
 }

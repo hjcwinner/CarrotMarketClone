@@ -1,104 +1,30 @@
+import 'package:CarrotMarketClone/app.dart';
 import 'package:CarrotMarketClone/repository/contents_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'detailPage.dart';
 
-class Home extends StatefulWidget {
+class Favorite extends StatefulWidget {
   @override
-  _HomeState createState() => _HomeState();
+  _FavoriteState createState() => _FavoriteState();
 }
 
-class _HomeState extends State<Home> {
+class _FavoriteState extends State<Favorite> {
   ContentsRepository contentsRepository;
 
-  String currentLocation;
-  final Map<String, String> locationCurrent = {
-    "sinsa": "신사동",
-    "nonhy": "논현동",
-    "yuksa": "역삼동"
-  };
-
-  void initState() {
+  @override
+  void initState(){
     super.initState();
-    currentLocation = "sinsa";
+
     contentsRepository = ContentsRepository();
   }
 
   Widget _appbarwd() {
-    return AppBar(
-      elevation: 1,
-      title: GestureDetector(
-        onTap: () {
-          print('left click');
-        },
-        child: PopupMenuButton<String>(
-          offset: Offset(0, 20),
-          shape: ShapeBorder.lerp(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              1),
-          onSelected: (String where) {
-            print(where);
-            setState(() {
-              currentLocation = where;
-            });
-          },
-          itemBuilder: (BuildContext context) {
-            return [
-              PopupMenuItem(
-                value: "sinsa",
-                child: Text("신사동"),
-              ),
-              PopupMenuItem(
-                value: "nonhy",
-                child: Text("논현동"),
-              ),
-              PopupMenuItem(
-                value: "yuksa",
-                child: Text("역삼동"),
-              )
-            ];
-          },
-          child: Row(
-            children: [
-              Text(locationCurrent[currentLocation]),
-              Icon(Icons.arrow_drop_down)
-            ],
-          ),
-        ),
-      ),
-      backgroundColor: Colors.white,
-      actions: [
-        IconButton(
-            icon: Icon(
-              Icons.search,
-              color: Colors.black,
-            ),
-            onPressed: () {}),
-        IconButton(
-            icon: Icon(
-              Icons.tune,
-              color: Colors.black,
-            ),
-            onPressed: () {}),
-        IconButton(
-            icon: SvgPicture.asset(
-              "assets/svg/bell.svg",
-              color: Colors.black,
-              height: 25,
-              width: 25,
-            ),
-            onPressed: () {})
-      ],
-    );
+    return AppBar(title: Text("Favorite"));
   }
 
-  _loadContents() {
-    return contentsRepository.loadContentsFromLocation(currentLocation);
-  }
-
-  _makeDataList(List<Map<String, String>> datas) {
+  _makeDataList(List<dynamic> datas) {
     return ListView.separated(
         padding: EdgeInsets.symmetric(horizontal: 10),
         itemBuilder: (context, index) {
@@ -195,9 +121,14 @@ class _HomeState extends State<Home> {
       return priceString + "원";
   }
 
+  Future<List<dynamic>> _loadMyFavoriteContents()async{
+return await contentsRepository.loadFavoriteContents();
+  }
+
+  
   Widget _bodyWidget() {
     return FutureBuilder(
-      future: _loadContents(),
+      future: _loadMyFavoriteContents(),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Center(child: CircularProgressIndicator());
@@ -219,6 +150,8 @@ class _HomeState extends State<Home> {
       },
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
